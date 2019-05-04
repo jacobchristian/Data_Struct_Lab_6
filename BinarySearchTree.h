@@ -124,10 +124,12 @@ std::shared_ptr<BinaryNode<ItemType>> BinarySearchTree<ItemType>::placeNode(std:
     if (subTreePtr == nullptr) {    //root of subtree
         return newNodePtr;
     }
+    //If the established node's item is > than the new node's item, then attach towards left branch
     else if (subTreePtr->getItem() > newNodePtr->getItem() ){
         auto tempPtr = placeNode(subTreePtr->getLeftChildPtr(), newNodePtr);
         subTreePtr->setLeftChildPtr(tempPtr);
     }
+        //If the established node's item is < than the new node's item, then attach towards right branch
     else {
         auto tempPtr = placeNode(subTreePtr->getRightChildPtr(), newNodePtr);
         subTreePtr->setRightChildPtr(tempPtr);
@@ -163,32 +165,75 @@ std::shared_ptr<BinaryNode<ItemType>> BinarySearchTree<ItemType>::removeValue(
 template<class ItemType>
 std::shared_ptr<BinaryNode<ItemType>> BinarySearchTree<ItemType>::removeNode(
         std::shared_ptr<BinaryNode<ItemType>> nodePtr) {
+
+    //Mark if there is a single child and leaf in either the left or right branch
+    bool hasSingleLeftChild = (nodePtr->getRightChildPtr() == nullptr) && (nodePtr->getLeftChildPtr() != nullptr);
+    bool hasSingleRightChild = (nodePtr->getRightChildPtr() != nullptr) && (nodePtr->getLeftChildPtr() == nullptr);
+
+    //If it's a leaf, we can delete this node
     if (nodePtr->isLeaf()) {
         nodePtr = nullptr;
         return nodePtr;
     }
-    //STUB
+    //If there's one child, then connect parent node to grandchild node of the child node being deleted
+    else if (hasSingleLeftChild || hasSingleRightChild){
+        auto nodeToConnectPtr = std::make_shared<BinaryNode<ItemType>>();        //Initialize node we're returning
+        if (hasSingleLeftChild){
+            nodeToConnectPtr = nodePtr->getLeftChildPtr();
+        }
+        else {
+            nodeToConnectPtr = nodePtr->getRightChildPtr();
+        }
+        return nodeToConnectPtr;
+    }
+    else {   //nodePtr has two children
+        //Find the inorder successor of the entry in nodePtr: it is the left subtree rooted
+        //at nodePtr's right child
+
+        //Mark the current node's item, will use to replace the node we're removing
+        ItemType inorderSuccessor = nodePtr->getItem();
+        //Traverse down the right branch's leftmost node (not necessarily child node)
+        auto tempPtr = removeLeftmostNode(nodePtr->getRightChildPtr(), inorderSuccessor);
+        //Set local node's right child to the node found in tempPtr
+        nodePtr->setRightChildPtr(tempPtr);
+        //Set local node's item to the deleted node's item
+        nodePtr->setItem(inorderSuccessor);
+        return nodePtr;
+    }
 }
 
 template<class ItemType>
 std::shared_ptr<BinaryNode<ItemType>> BinarySearchTree<ItemType>::removeLeftmostNode(
-        std::shared_ptr<BinaryNode<ItemType>> subTreePtr, ItemType &inorderSuccessor) {
-    return subTreePtr;
-    //STUB
+        std::shared_ptr<BinaryNode<ItemType>> subTreePtr, ItemType& inorderSuccessor) {
+    if (subTreePtr->getLeftChildPtr() == nullptr){
+        //This is the node we're searching for, it has no left child, but might have a right subtree
+        inorderSuccessor = subTreePtr->getItem();
+        return removeNode(subTreePtr);
+    }
+    else {
+        //Traverse down the right child of root, furthest left descendant.
+        auto tempPtr = removeLeftmostNode(subTreePtr->getLeftChildPtr(), inorderSuccessor);
+        subTreePtr->setLeftChildPtr(tempPtr);
+        return subTreePtr;
+    }
 }
 
 template<class ItemType>
 std::shared_ptr<BinaryNode<ItemType>> BinarySearchTree<ItemType>::findNode(std::shared_ptr<BinaryNode<ItemType>> subTreePtr,
                                                                  const ItemType &target) const {
+    //If current subTree root is nullptr, we're at a leaf
     if (subTreePtr == nullptr){
         return subTreePtr;
     }
+    //If child node is equal to the target, return pointer to this node
     else if (subTreePtr->getItem() == target) {
         return subTreePtr;
     }
+    //If the local node's item is greater than the target, then search the left branch
     else if (subTreePtr->getItem() > target){
         return findNode(subTreePtr->getLeftChildPtr(), target);
     }
+    //If the local node's item is leass than the target, then search the right branch
     else {
         return findNode(subTreePtr->getRightChildPtr(), target);
     }

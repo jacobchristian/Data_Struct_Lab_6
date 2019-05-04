@@ -44,7 +44,7 @@ protected:
     // to overwrite value with value from child.
     virtual std::shared_ptr<BinaryNode<ItemType>>
     removeValue(std::shared_ptr<BinaryNode<ItemType>> subTreePtr,
-                const ItemType target, bool& success);
+                const ItemType& target, bool& success);
 
     // Recursively searches for target value in the tree by using a
     // preorder traversal.
@@ -194,7 +194,7 @@ std::shared_ptr<BinaryNode<ItemType>> BinaryNodeTree<ItemType>::moveValuesUpTree
  @returns  A pointer to node containing the item. */
 template<class ItemType>
 std::shared_ptr<BinaryNode<ItemType>> BinaryNodeTree<ItemType>::removeValue(std::shared_ptr<BinaryNode<ItemType>> subTreePtr,
-                                                                            const ItemType target,
+                                                                            const ItemType& target,
                                                                             bool& success)
 {
     if(subTreePtr == nullptr) // not found here

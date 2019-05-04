@@ -45,7 +45,7 @@ public:
 *******************************************************************************/
 template<class ItemType>
 BinaryNode<ItemType>::BinaryNode()
-        : item(nullptr), leftChildPtr(nullptr), rightChildPtr(nullptr)
+        : leftChildPtr(nullptr), rightChildPtr(nullptr)
 { }  // end default constructor
 
 template<class ItemType>
